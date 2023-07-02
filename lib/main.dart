@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'Route.dart';
+import 'RoutePage.dart';
 import 'Journey.dart';
 
 void main() {
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Journey App',
+      title: 'Journey',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -57,12 +57,45 @@ class _MyHomePageState extends State<MyHomePage> {
         itemCount: _journeys.length,
         itemBuilder: (context, index) {
           final Journey journey = _journeys[index];
-          return ListTile(
-            leading: journey.image != null
-                ? Image.network(journey.image ??
-                    'https://frogdesign.nyc3.cdn.digitaloceanspaces.com/wp-content/uploads/2021/08/30143009/21_Case-Study-BRP-01.jpg')
-                : const Icon(Icons.image_not_supported),
-            title: Text(journey.title),
+          return Dismissible(
+            key: Key(journey.title),
+            onDismissed: (direction) {
+              setState(() {
+                _journeys.removeAt(index);
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${journey.title} removed'),
+                ),
+              );
+            },
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.delete, color: Colors.white),
+              ),
+            ),
+            child: ListTile(
+              leading: journey.image != null
+                  ? Image.network(journey.image ??
+                      'https://frogdesign.nyc3.cdn.digitaloceanspaces.com/wp-content/uploads/2021/08/30143009/21_Case-Study-BRP-01.jpg')
+                  : const Icon(Icons.image_not_supported),
+              title: Text(journey.title),
+              subtitle: journey.path.isNotEmpty
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                            'Start point: ${journey.path.first.latitude}, ${journey.path.first.longitude}'),
+                        Text(
+                            'End point: ${journey.path.last.latitude}, ${journey.path.last.longitude}'),
+                      ],
+                    )
+                  : Text('No path data'),
+            ),
           );
         },
       ),
